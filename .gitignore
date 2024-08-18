@@ -1,0 +1,53 @@
+# Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Poetry environment
+poetry.lock
+*.env
+
+# Virtual environment directories
+venv/
+.env/
+*.venv/
+
+# FastAPI specific files
+instance/
+.webassets-cache/
+
+# Nginx and Gunicorn
+*.pid
+*.sock
+
+# PM2 logs
+*.log
+
+# PyCharm or IntelliJ IDEA
+.idea/
+
+# VSCode settings
+.vscode/
+
+# macOS specific
+.DS_Store
+
+# Ubuntu specific
+*~
+
+# System-specific files
+*.swp
+*.swo
+*.swn
+
+# Coverage reports
+.coverage
+.coverage.*
+*.cover
+
+# Migrations folder (if using Alembic)
+migrations/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/

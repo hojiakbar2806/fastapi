@@ -5,7 +5,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "It works"}
+    return {"message": "It works test2"}
 
 
 @app.post("/{query}")
