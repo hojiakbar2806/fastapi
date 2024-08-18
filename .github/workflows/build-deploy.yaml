@@ -27,7 +27,7 @@ jobs:
         run: poetry --version
 
       - name: Kutubxonalarni o'rnatish
-        run: poetry install --no-root --no-dev
+        run: poetry install --no-root --no-devfru 
 
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
@@ -37,7 +37,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/fastapi
-            git pull origin main
+            git pull
             poetry install --no-dev
             pm2 restart fastapi --update-env
             sudo systemctl restart nginx
