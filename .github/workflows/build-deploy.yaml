@@ -39,5 +39,3 @@ jobs:
             cd /home/ubuntu/fastapi
             git pull origin main
             export PATH="$HOME/.local/bin:$PATH"
-            # PM2 deploy so'roviga asosan post-deploy ishlaydi
-            # poetry install va pm2 reload ishlaydi
