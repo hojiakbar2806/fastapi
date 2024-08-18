@@ -1,52 +1,47 @@
-name: Deploy to AWS EC2
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main # O'zgartirish uchun asosiy tarmoq
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Kodni yuklab olish
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Python o'rnatish
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12" # Python versiyasi
+          python-version: "3.12"
 
-      - name: Install Poetry
+      - name: Poetry o'rnatish
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          # `PATH` o'zgaruvchisini faqat joriy ish sessiyasiga qo'shamiz
+          echo "PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
 
-      - name: Install dependencies
-        run: |
-          poetry install
+      - name: Poetry versiyasini tekshirish
+        run: poetry --version
 
-      - name: Deploy to AWS EC2
-        env:
-          SERVER_IP: ${{ secrets.HOST }}
-          SERVER_USER: ${{ secrets.USERNAME }}
-          DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          # SSH kalitini faylga yozish va ruxsat berish
-          echo "$DEPLOY_KEY" > deploy_key.pem
-          chmod 600 deploy_key.pem
-          
-          # Serverning SSH kalitini known_hosts faylga qo'shish
-          mkdir -p ~/.ssh
-          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-          
-          # Fayllarni serverga uzatish
-          scp -i deploy_key.pem -r . $SERVER_USER@$SERVER_IP:/path/to/deploy/
-          
-          # Serverda buyruqlarni bajarish
-          ssh -i deploy_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
-            cd /path/to/deploy/
-            poetry install
-            pm2 restart fastapi
-          EOF
+      - name: Kutubxonalarni o'rnatish
+        run: poetry install --no-root --no-dev
+
+      - name: EC2 serverga ulanish va loyihani joylashtirish
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/fastapi
+            git pull origin main
+            # Faqat o'zgargan fayllarni tekshiramiz
+            if [[ $(git diff --name-only HEAD^ | grep -E 'poetry.lock|pyproject.toml') ]]; then
+              poetry install --no-dev
+            fi
+            pm2 restart fastapi --update-env
+            sudo systemctl restart nginx

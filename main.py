@@ -5,4 +5,4 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": "It works"}
+    return {"message": "It works with ci/cd"}
