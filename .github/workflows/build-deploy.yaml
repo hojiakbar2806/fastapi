@@ -6,9 +6,8 @@ on:
       - main
 
 jobs:
-  deploy:
+  setup:
     runs-on: ubuntu-latest
-
     steps:
       - name: Kodni yuklab olish
         uses: actions/checkout@v3
@@ -21,14 +20,36 @@ jobs:
       - name: Poetry o'rnatish
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
-          export PATH="$HOME/.local/bin:$PATH"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Poetry versiyasini tekshirish
-        run: poetry --version
+      - name: Kutubxonalarni kesh qilish
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.local/share/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
 
       - name: Kutubxonalarni o'rnatish
-        run: poetry install
+        run: |
+          poetry install --only main
 
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build jarayonini bajarish
+        run: |
+          # Build jarayoni
+          echo "Building project..."
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -39,6 +60,6 @@ jobs:
             cd /home/ubuntu/fastapi
             git pull origin main
             export PATH="$HOME/.local/bin:$PATH"
-            poetry install --no-dev
+            poetry install --only main
             pm2 restart fastapi --update-env
             sudo systemctl restart nginx
