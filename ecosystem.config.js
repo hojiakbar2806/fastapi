@@ -17,7 +17,7 @@ module.exports = {
       repo: "https://github.com/hojiakbar2806/fastapi.git", // Git repozitoriy URL
       path: "/home/ubuntu/fastapi", // Serverdagi yo'l
       "post-deploy":
-        "poetry install --only main && pm2 reload ecosystem.config.js --env production", // Deploydan keyingi buyruqlar
+        "poetry install --only main && pm2 reload ecosystem.config.js", // Deploydan keyingi buyruqlar
     },
   },
 };
