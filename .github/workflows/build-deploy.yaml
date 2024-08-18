@@ -13,22 +13,6 @@ jobs:
       - name: Kodni yuklab olish
         uses: actions/checkout@v3
 
-      - name: Python o'rnatish
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-
-      - name: Poetry o'rnatish
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Poetry versiyasini tekshirish
-        run: poetry --version
-
-      - name: Kutubxonalarni o'rnatish
-        run: poetry install --only main
-
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -38,12 +22,14 @@ jobs:
           script: |
             cd /home/ubuntu/fastapi
             git pull origin main
-            
+
             # Yashirin o'zgaruvchilarni yuklash
             echo "$ENV_FILE_CONTENT" > .env
 
-            export PATH="$HOME/.local/bin:$PATH"
+            # Kerakli paketlarni o'rnatish
             poetry install --only main
+
+            # PM2 va Nginxni yangilash
             pm2 reload ecosystem.config.js
             sudo systemctl restart nginx
             pm2 status
