@@ -13,10 +13,11 @@ jobs:
       SSH_KEY: ${{ secrets.SSH_KEY }}
       USERNAME: ${{ secrets.USERNAME }}
       HOST: ${{ secrets.HOST }}
+      REPO_URL: https://github.com/${{ github.repository }}.git
 
     steps:
       - name: Kodni yuklab olish
-        run: git clone https://github.com/<your-repo>.git
+        run: git clone $REPO_URL
 
       - name: Python kutubxonalarini o'rnatish
         run: |
