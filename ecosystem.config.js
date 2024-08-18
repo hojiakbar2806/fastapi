@@ -2,13 +2,11 @@ module.exports = {
   apps: [
     {
       name: "fastapi", // Ilova nomi
-      script: "main.py", // Asosiy skript
+      script: "poetry", // `poetry` yordamida ishga tushiradi
       interpreter: "python3", // Python interpreteri
-      instances: "max", // Ilova ko'paytmasi soni (max CPU yadrolari bo'yicha)
-      exec_mode: "cluster", // Clustering rejimida ishga tushiring
-      autorestart: true, // Ilova ishga tushirishdan oldin qayta ishga tushiriladi
-      watch: false, // Ilova ishga tushirishdan oldin qayta ishga tushiriladi
-      max_memory_restart: "1G", // Ilova ishga tushirishdan oldin qayta ishga tushiriladi
+      args: "run gunicorn main:app --workers 4 --port 8000 --worker-class uvicorn.workers.UvicornWorker", // Gunicorn uchun parametrlar
+      instances: "max", // CPU yadrolari bo'yicha ilova ko'paytmasi
+      exec_mode: "cluster", // Clustering rejimida ishga tushirish
     },
   ],
 };
