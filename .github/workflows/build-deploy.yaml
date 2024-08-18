@@ -39,3 +39,6 @@ jobs:
             cd /home/ubuntu/fastapi
             git pull origin main
             export PATH="$HOME/.local/bin:$PATH"
+            poetry install --only main
+            pm2 restart fastapi
+            sudo service nginx restart
