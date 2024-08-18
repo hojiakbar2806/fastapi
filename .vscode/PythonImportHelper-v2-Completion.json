@@ -137,7 +137,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "app = FastAPI()\n@app.get(\"/\")\nasync def root():\n    return {\"message\": \"It works with CI/CD !!!\"}",
+        "peekOfCode": "app = FastAPI()\n@app.get(\"/\")\nasync def root():\n    return {\"message\": \"It works with CI/CD\"}",
         "detail": "main",
         "documentation": {}
     }

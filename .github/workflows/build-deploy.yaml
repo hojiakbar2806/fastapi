@@ -38,6 +38,7 @@ jobs:
           script: |
             cd /home/ubuntu/fastapi
             git pull origin main
+            export PATH="$HOME/.local/bin:$PATH"
             poetry install --no-dev
             pm2 restart fastapi --update-env
             sudo systemctl restart nginx
