@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  setup:
+  ci_cd:
     runs-on: ubuntu-latest
     steps:
       - name: Kodni yuklab olish
@@ -41,29 +41,19 @@ jobs:
         run: poetry install --only main --no-root
         # Kutubxonalarni Poetry orqali o'rnatish
 
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build jarayonini bajarish
-        run: |
-          echo "::group::Building project"
-          # Build jarayonini bajarish
-          echo "Building project..."
-          echo "::endgroup::"
-        # Build jarayonini amalga oshirish
-
+      # - name: Build jarayonini bajarish
+      #   run: |
+      #     echo "::group::Building project"
+      #     # Build jarayonini bajarish
+      #     echo "Building project..."
+      #     echo "::endgroup::"
+      # Build jarayonini amalga oshirish
       # - name: Testlarni ishga tushirish
       #   run: |
       #     echo "::group::Running tests"
       #     poetry run pytest
       #     echo "::endgroup::"
-      #   # Testlarni ishga tushirish
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
+      # Testlarni ishga tushirish
       - name: Git pull va merge konfliktlarni tekshirish
         run: |
           echo "::group::Fetching and checking for merge conflicts"
