@@ -28,7 +28,7 @@ jobs:
         run: poetry --version
 
       - name: Kutubxonalarni o'rnatish
-        run: poetry install --no-root --no-dev
+        run: poetry install
 
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
@@ -39,9 +39,6 @@ jobs:
           script: |
             cd /home/ubuntu/fastapi
             git pull origin main
-            # Faqat o'zgargan fayllarni tekshiramiz
-            if [[ $(git diff --name-only HEAD^ | grep -E 'poetry.lock|pyproject.toml') ]]; then
-              poetry install --no-dev
-            fi
+            poetry install
             pm2 restart fastapi --update-env
             sudo systemctl restart nginx
