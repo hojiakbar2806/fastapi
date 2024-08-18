@@ -40,7 +40,7 @@ jobs:
             git pull origin main
             
             # Yashirin o'zgaruvchilarni yuklash
-            echo "$ENV_FILE_CONTENT" > .env
+            echo "$ENV_FILE_CONTENT" > fastapi/.env
 
             export PATH="$HOME/.local/bin:$PATH"
             poetry install --only main
