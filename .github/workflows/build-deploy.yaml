@@ -38,8 +38,12 @@ jobs:
           script: |
             cd /home/ubuntu/fastapi
             git pull origin main
+            
+            # Yashirin o'zgaruvchilarni yuklash
+            echo "$ENV_FILE_CONTENT" > .env
+
             export PATH="$HOME/.local/bin:$PATH"
             poetry install --only main
-            pm2 reload ecosystem.config.js 
+            pm2 reload ecosystem.config.js
             sudo systemctl restart nginx
             pm2 status
