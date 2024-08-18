@@ -27,9 +27,7 @@ jobs:
         run: poetry --version
 
       - name: Kutubxonalarni o'rnatish
-        run: |
-          cd /home/ubuntu/fastapi
-          poetry install --only main
+        run: poetry install --only main
 
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
@@ -40,14 +38,12 @@ jobs:
           script: |
             cd /home/ubuntu/fastapi
             git pull origin main
-
+            
             # Yashirin o'zgaruvchilarni yuklash
             echo "$ENV_FILE_CONTENT" > .env
 
-            # Kerakli paketlarni o'rnatish
+            export PATH="$HOME/.local/bin:$PATH"
             poetry install --only main
-
-            # PM2 va Nginxni yangilash
             pm2 reload ecosystem.config.js
             sudo systemctl restart nginx
             pm2 status
