@@ -40,5 +40,6 @@ jobs:
             git pull origin main
             export PATH="$HOME/.local/bin:$PATH"
             poetry install --only main
-            pm2 reload ecosystem.config.js --env production
+            pm2 reload ecosystem.config.js 
             sudo systemctl restart nginx
+            pm2 status
