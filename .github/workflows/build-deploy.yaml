@@ -1,0 +1,39 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      USERNAME: ${{ secrets.USERNAME }}
+      HOST: ${{ secrets.HOST }}
+
+    steps:
+      - name: Kodni yuklab olish
+        run: git clone https://github.com/<your-repo>.git
+
+      - name: Python kutubxonalarini o'rnatish
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install --only main
+
+      - name: AWS serveriga ulanish va loyihani yangilash
+        run: |
+          echo "$SSH_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          ssh -i /tmp/id_rsa $USERNAME@$HOST "cd /home/ubuntu/fastapi && git pull"
+
+      - name: Poetry orqali kutubxonalarni o'rnatish
+        run: |
+          ssh -i /tmp/id_rsa $USERNAME@$HOST "cd /home/ubuntu/fastapi && poetry install"
+
+      - name: PM2 orqali dasturni qayta ishga tushirish
+        run: |
+          ssh -i /tmp/id_rsa $USERNAME@$HOST "pm2 restart fastapi"
