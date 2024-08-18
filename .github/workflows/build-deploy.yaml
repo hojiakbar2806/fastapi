@@ -6,9 +6,8 @@ on:
       - main
 
 jobs:
-  deploy:
+  setup:
     runs-on: ubuntu-latest
-
     steps:
       - name: Kodni yuklab olish
         uses: actions/checkout@v3
@@ -23,11 +22,47 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Poetry versiyasini tekshirish
-        run: poetry --version
+      - name: Kutubxonalarni kesh qilish
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.local/share/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
 
       - name: Kutubxonalarni o'rnatish
-        run: poetry install --only main
+        run: poetry install --only main --no-root
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build jarayonini bajarish
+        run: |
+          echo "Building project..."
+          echo "::group::Building project"
+          # Build jarayoni
+          echo "::endgroup::"
+
+      - name: Testlarni ishga tushirish
+        run: |
+          echo "::group::Running tests"
+          poetry run pytest
+          echo "::endgroup::"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git pull va merge konfliktlarni tekshirish
+        run: |
+          echo "::group::Fetching and checking for merge conflicts"
+          git fetch origin
+          git diff --name-only HEAD $(git merge-base HEAD origin/main) || echo "No conflicts detected"
+          echo "::endgroup::"
 
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
@@ -37,8 +72,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/fastapi
-            git pull origin main
+            git pull origin main || { echo 'Git pull failed'; exit 1; }
             export PATH="$HOME/.local/bin:$PATH"
-            poetry install --only main
-            pm2 restart fastapi --update-env
-            sudo systemctl restart nginx
+            poetry install --only main --no-root || { echo 'Poetry install failed'; exit 1; }
+            pm2 restart fastapi --update-env || { echo 'PM2 restart failed'; exit 1; }
+            sudo systemctl restart nginx || { echo 'Nginx restart failed'; exit 1; }
+            pm2 status || { echo 'PM2 status failed'; exit 1; }
