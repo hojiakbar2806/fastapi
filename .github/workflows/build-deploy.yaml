@@ -6,8 +6,9 @@ on:
       - main
 
 jobs:
-  setup:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Kodni yuklab olish
         uses: actions/checkout@v3
@@ -22,34 +23,12 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Kutubxonalarni kesh qilish
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.local/share/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+      - name: Poetry versiyasini tekshirish
+        run: poetry --version
 
       - name: Kutubxonalarni o'rnatish
-        run: |
-          poetry install --only main
+        run: poetry install --only main
 
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build jarayonini bajarish
-        run: |
-          # Build jarayoni
-          echo "Building project..."
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
         with:
