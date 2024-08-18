@@ -6,61 +6,28 @@ on:
       - main
 
 jobs:
-  ci_cd:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Kodni yuklab olish
         uses: actions/checkout@v3
-        # Kodni repositoriyadan yuklab olish
 
       - name: Python o'rnatish
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
-        # Python 3.12 versiyasini o'rnatish
 
       - name: Poetry o'rnatish
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-        # Poetry paket boshqaruvchisini o'rnatish
 
-      - name: Kutubxonalarni kesh qilish
-        id: cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.local/share/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
-        # Poetry kutubxonalarini kesh qilish
+      - name: Poetry versiyasini tekshirish
+        run: poetry --version
 
       - name: Kutubxonalarni o'rnatish
-        run: poetry install --only main --no-root
-        # Kutubxonalarni Poetry orqali o'rnatish
-
-      # - name: Build jarayonini bajarish
-      #   run: |
-      #     echo "::group::Building project"
-      #     # Build jarayonini bajarish
-      #     echo "Building project..."
-      #     echo "::endgroup::"
-      # Build jarayonini amalga oshirish
-      # - name: Testlarni ishga tushirish
-      #   run: |
-      #     echo "::group::Running tests"
-      #     poetry run pytest
-      #     echo "::endgroup::"
-      # Testlarni ishga tushirish
-      - name: Git pull va merge konfliktlarni tekshirish
-        run: |
-          echo "::group::Fetching and checking for merge conflicts"
-          git fetch origin
-          git diff --name-only HEAD $(git merge-base HEAD origin/main) || echo "No conflicts detected"
-          echo "::endgroup::"
-        # Git pull va merge konfliktlarni tekshirish
+        run: poetry install --only main
 
       - name: EC2 serverga ulanish va loyihani joylashtirish
         uses: appleboy/ssh-action@v0.1.5
@@ -70,10 +37,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/fastapi
-            git pull origin main || { echo 'Git pull failed'; exit 1; }
+            git pull origin main
             export PATH="$HOME/.local/bin:$PATH"
-            poetry install --only main --no-root || { echo 'Poetry install failed'; exit 1; }
-            pm2 restart fastapi --update-env || { echo 'PM2 restart failed'; exit 1; }
-            sudo systemctl restart nginx || { echo 'Nginx restart failed'; exit 1; }
-            pm2 status || { echo 'PM2 status failed'; exit 1; }
-        # EC2 serverga ulanish, kodni yangilash va loyihani qayta ishga tushirish
+            poetry install --only main
+            pm2 restart fastapi --update-env
+            sudo systemctl restart nginx
+            pm2 status
