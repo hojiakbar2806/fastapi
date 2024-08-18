@@ -33,9 +33,18 @@ jobs:
           SERVER_USER: ${{ secrets.USERNAME }}
           DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          # SSH kalitini faylga yozish va ruxsat berish
           echo "$DEPLOY_KEY" > deploy_key.pem
           chmod 600 deploy_key.pem
+          
+          # Serverning SSH kalitini known_hosts faylga qo'shish
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+          
+          # Fayllarni serverga uzatish
           scp -i deploy_key.pem -r . $SERVER_USER@$SERVER_IP:/path/to/deploy/
+          
+          # Serverda buyruqlarni bajarish
           ssh -i deploy_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
             cd /path/to/deploy/
             poetry install
