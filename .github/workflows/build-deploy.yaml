@@ -30,7 +30,7 @@ jobs:
         run: poetry install --only main
 
       - name: EC2 serverga ulanish va loyihani joylashtirish
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
